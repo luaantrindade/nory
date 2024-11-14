@@ -1,7 +1,7 @@
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom"; // Removed duplicate import
 import {HomePage} from "./pages/HomePage";
-import {Task} from "./pages/Task";
+import Task from './pages/Task.js';
 import {Header} from "./components/Header";
 
 function App() {
