@@ -40,11 +40,13 @@ console.log("Initializing server...");
 // PostgreSQL connection setup
 const client = new Client({
   connectionString:
-    "postgres://default:XJnBK6CeLh3G@ep-green-fog-a4c630vj.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
-  ssl: {
-    rejectUnauthorized: false,  // SSL configuration
-  },
+    "postgres://default:XJnBK6CeLh3G@ep-green-fog-a4c630vj.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require"
 });
+
+// app.use((req, res, next) => {
+//   res.set('Cache-Control', 'no-store');
+//   next();
+// });
 
 // Connect to PostgreSQL database
 async function testConnection() {
@@ -63,7 +65,8 @@ testConnection();
 app.get("/api/recipes", async (req, res) => {
   try {
     const recipesResult = await client.query('SELECT * FROM nory.recipes');
-    res.json(recipesResult.rows); // Send recipes data as JSON
+    res.json(recipesResult); // Send recipes data as JSON
+    console.log(recipesResult.rows);
   } catch (err) {
     console.error("Error fetching recipes:", err);
     res.status(500).json({ error: "Failed to fetch recipes data" });
@@ -74,7 +77,7 @@ app.get("/api/recipes", async (req, res) => {
 app.get("/api/ingredients", async (req, res) => {
   try {
     const ingredientsResult = await client.query('SELECT * FROM "nory"."ingredients "');
-    res.json(ingredientsResult.rows); // Send ingredients data as JSON
+    res.json(ingredientsResult); // Send ingredients data as JSON
   } catch (err) {
     console.error("Error fetching ingredients:", err);
     res.status(500).json({ error: "Failed to fetch ingredients data" });
@@ -85,7 +88,7 @@ app.get("/api/ingredients", async (req, res) => {
 app.get("/api/items", async (req, res) => {
   try {
     const itemsResult = await client.query('SELECT * FROM "nory"."items"');
-    res.json(itemsResult.rows); // Send items data as JSON
+    res.json(itemsResult); // Send items data as JSON
   } catch (err) {
     console.error("Error fetching items:", err);
     res.status(500).json({ error: "Failed to fetch items data" });
@@ -93,13 +96,6 @@ app.get("/api/items", async (req, res) => {
 });
 
 // Start the server
-app.listen(5432, () => {
-  console.log("Server running on port 5000");
-});
-
-// Gracefully shutdown on SIGINT
-process.on('SIGINT', async () => {
-  await client.end();
-  console.log("PostgreSQL connection closed");
-  process.exit(0);
+app.listen(5001, () => {
+  console.log("Server running on port 5001");
 });

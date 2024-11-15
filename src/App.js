@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"; // Removed dupl
 import {HomePage} from "./pages/HomePage";
 import Task from './pages/Task.js';
 import {Header} from "./components/Header";
+import CalculateProfit from './pages/CalculateProfit';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/task" element={<Task />} />
+          <Route path="/calculate-profit" Component={CalculateProfit} />
         </Routes>
       </BrowserRouter>
     </div>
