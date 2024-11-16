@@ -10,9 +10,9 @@ function Task() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const recipesRes = await fetch('http://localhost:5001/api/recipes');
-        const ingredientsRes = await fetch('http://localhost:5001/api/ingredients');
-        const itemsRes = await fetch('http://localhost:5001/api/items');
+        const recipesRes = await fetch('/api/recipes');
+        const ingredientsRes = await fetch('/api/ingredients');
+        const itemsRes = await fetch('/api/items');
 
         const recipesData = await recipesRes.json();
         const ingredientsData = await ingredientsRes.json();
