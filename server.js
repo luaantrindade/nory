@@ -32,7 +32,7 @@ const cors = require("cors");
 const app = express();
 
 // Allow cross-origin requests from the frontend
-app.use(cors());
+app.use(cors({ origin: "https://n-o-r-y.vercel.app" }));
 app.use(express.json());
 
 console.log("Initializing server...");
