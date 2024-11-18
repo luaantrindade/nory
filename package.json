@@ -67,5 +67,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "proxy": "http://n-o-r-y.vercel.app:5001"
+  "proxy": "http://n-o-r-y.vercel.app:5432"
 }
