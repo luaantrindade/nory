@@ -66,7 +66,7 @@ app.get("/api/recipes", async (req, res) => {
   try {
     const recipesResult = await client.query('SELECT * FROM nory.recipes');
     res.json(recipesResult); // Send recipes data as JSON
-    console.log(recipesResult);
+    console.log("testr server",recipesResult);
   } catch (err) {
     console.error("Error fetching recipes:", err);
     res.status(500).json({ error: "Failed to fetch recipes data" });
