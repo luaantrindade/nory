@@ -96,6 +96,6 @@ app.get("/api/items", async (req, res) => {
 });
 
 // Start the server
-app.listen(5001, () => {
-  console.log("Server running on port 5001");
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
 });
