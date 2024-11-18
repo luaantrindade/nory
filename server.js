@@ -29,6 +29,7 @@
 const express = require("express");
 const { Client } = require("pg");
 const cors = require("cors");
+const NodeCache = require("node-cache"); // Import node-cache
 const app = express();
 
 // Allow cross-origin requests from the frontend
@@ -40,13 +41,11 @@ console.log("Initializing server...");
 // PostgreSQL connection setup
 const client = new Client({
   connectionString:
-    "postgres://default:XJnBK6CeLh3G@ep-green-fog-a4c630vj.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require"
+    "postgres://default:XJnBK6CeLh3G@ep-green-fog-a4c630vj.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require",
 });
 
-// app.use((req, res, next) => {
-//   res.set('Cache-Control', 'no-store');
-//   next();
-// });
+// Cache setup
+const cache = new NodeCache({ stdTTL: 3600 }); // Cache with a default TTL of 1 hour
 
 // Connect to PostgreSQL database
 async function testConnection() {
@@ -55,18 +54,31 @@ async function testConnection() {
     console.log("Connected to PostgreSQL successfully");
   } catch (err) {
     console.error("Error connecting to the database:", err.message);
-    process.exit(1);  // Exit the process if connection fails
+    process.exit(1); // Exit the process if connection fails
   }
 }
 
 testConnection();
 
+// Utility function to handle caching logic
+async function fetchWithCache(cacheKey, query) {
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    console.log(`Cache hit for key: ${cacheKey}`);
+    return cachedData;
+  }
+
+  console.log(`Cache miss for key: ${cacheKey}. Fetching from database...`);
+  const result = await client.query(query);
+  cache.set(cacheKey, result.rows); // Cache the data
+  return result.rows;
+}
+
 // Endpoint to fetch all recipes
 app.get("/api/recipes", async (req, res) => {
   try {
-    const recipesResult = await client.query('SELECT * FROM nory.recipes');
-    res.json(recipesResult); // Send recipes data as JSON
-    console.log("testr server",recipesResult);
+    const recipes = await fetchWithCache("recipes", 'SELECT * FROM nory.recipes');
+    res.json(recipes); // Send recipes data as JSON
   } catch (err) {
     console.error("Error fetching recipes:", err);
     res.status(500).json({ error: "Failed to fetch recipes data" });
@@ -76,8 +88,8 @@ app.get("/api/recipes", async (req, res) => {
 // Endpoint to fetch all ingredients
 app.get("/api/ingredients", async (req, res) => {
   try {
-    const ingredientsResult = await client.query('SELECT * FROM "nory"."ingredients "');
-    res.json(ingredientsResult); // Send ingredients data as JSON
+    const ingredients = await fetchWithCache("ingredients", 'SELECT * FROM "nory"."ingredients "');
+    res.json(ingredients); // Send ingredients data as JSON
   } catch (err) {
     console.error("Error fetching ingredients:", err);
     res.status(500).json({ error: "Failed to fetch ingredients data" });
@@ -87,8 +99,8 @@ app.get("/api/ingredients", async (req, res) => {
 // Endpoint to fetch all items
 app.get("/api/items", async (req, res) => {
   try {
-    const itemsResult = await client.query('SELECT * FROM "nory"."items"');
-    res.json(itemsResult); // Send items data as JSON
+    const items = await fetchWithCache("items", 'SELECT * FROM "nory"."items"');
+    res.json(items); // Send items data as JSON
   } catch (err) {
     console.error("Error fetching items:", err);
     res.status(500).json({ error: "Failed to fetch items data" });
