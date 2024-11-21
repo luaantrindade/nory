@@ -13,7 +13,7 @@ function Task() {
         const recipesRes = await fetch('/api/recipes');
         const ingredientsRes = await fetch('/api/ingredients');
         const itemsRes = await fetch('/api/items');
-        //console.log("fec", recipesRes, ingredientsRes, itemsRes);
+        console.log("fec", recipesRes, ingredientsRes, itemsRes);
         const recipesData = await recipesRes.json();
         const ingredientsData = await ingredientsRes.json();
         const itemsData = await itemsRes.json();
@@ -26,10 +26,13 @@ function Task() {
         console.log("Ingredients Data:", ingredientsData);
         console.log("Items Data:", itemsData);
 
+
+
         // Extract rows for recipes, ingredients, and items
         setRecipes(recipesData.rows || []);
         setIngredients(ingredientsData.rows || []);
         setItems(itemsData.rows || []);
+
       } catch (error) {
         console.error('Error fetching data:', error);
       }

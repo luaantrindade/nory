@@ -66,6 +66,5 @@
   "main": "postcss.config.js",
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "proxy": "http://n-o-r-y.vercel.app:5432"
+  "license": "ISC"
 }
