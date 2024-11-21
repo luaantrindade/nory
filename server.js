@@ -26,9 +26,11 @@
 // // Run the test connection function
 // testConnection();
 
+require("dotenv").config(); // Import and configure dotenv
 const express = require("express");
-const { Client } = require("pg");
+const { Pool } = require("pg");
 const cors = require("cors");
+
 const app = express();
 
 // Allow cross-origin requests from the frontend
@@ -37,61 +39,34 @@ app.use(express.json());
 
 console.log("Initializing server...");
 
-// PostgreSQL connection setup
-const client = new Client({
-  connectionString:
-    "postgres://default:XJnBK6CeLh3G@ep-green-fog-a4c630vj.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require"
+// PostgreSQL connection pool setup
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL, // Use the environment variable
+  max: 10, // Maximum number of connections
+  idleTimeoutMillis: 30000, // Close idle connections after 30 seconds
+  connectionTimeoutMillis: 2000, // Timeout for establishing a connection
+  keepAlive: true, // Keeps connections alive
 });
 
-// app.use((req, res, next) => {
-//   res.set('Cache-Control', 'no-store');
-//   next();
-// });
-
-// Connect to PostgreSQL database
-async function testConnection() {
-  try {
-    await client.connect();
-    console.log("Connected to PostgreSQL successfully2");
-  } catch (err) {
-    console.error("Error connecting to the database:", err.message);
-    process.exit(1);  // Exit the process if connection fails
-  }
-}
-
-testConnection();
+// Log pool errors
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle client:", err);
+  process.exit(-1); // Optional: Exit if there's a critical issue
+});
 
 // Endpoint to fetch all recipes
 app.get("/api/recipes", async (req, res) => {
+  let client;
   try {
-    const recipesResult = await client.query("SELECT * FROM nory.recipes");
-    res.json(recipesResult); // Send recipes data as JSON
-    console.log("testr server",recipesResult);
+    client = await pool.connect(); // Get a connection from the pool
+    const result = await client.query("SELECT * FROM nory.recipes");
+    res.json(result);
+    console.log(result); // Send recipes data as JSON
   } catch (err) {
     console.error("Error fetching recipes:", err);
     res.status(500).json({ error: "Failed to fetch recipes data" });
-  }
-});
-
-// Endpoint to fetch all ingredients
-app.get("/api/ingredients", async (req, res) => {
-  try {
-    const ingredientsResult = await client.query('SELECT * FROM "nory"."ingredients "');
-    res.json(ingredientsResult); // Send ingredients data as JSON
-  } catch (err) {
-    console.error("Error fetching ingredients:", err);
-    res.status(500).json({ error: "Failed to fetch ingredients data" });
-  }
-});
-
-// Endpoint to fetch all items
-app.get("/api/items", async (req, res) => {
-  try {
-    const itemsResult = await client.query('SELECT * FROM "nory"."items"');
-    res.json(itemsResult); // Send items data as JSON
-  } catch (err) {
-    console.error("Error fetching items:", err);
-    res.status(500).json({ error: "Failed to fetch items data" });
+  } finally {
+    if (client) client.release(); // Release the connection back to the pool
   }
 });
 
